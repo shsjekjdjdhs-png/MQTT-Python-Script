@@ -2,3 +2,4 @@
 /certs
 .env
 /__pycache__
+*.stop
