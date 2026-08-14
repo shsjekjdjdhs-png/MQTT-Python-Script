@@ -15,7 +15,7 @@ def _coerce(value):
     """Numeric fields sometimes arrive as strings (e.g. "volt": "4.19") -
     convert anything numeric-looking to float, drop anything that isn't."""
     if isinstance(value, bool):
-        return None
+        return float(int(value))
     if isinstance(value, (int, float)):
         return float(value)
     if isinstance(value, str):

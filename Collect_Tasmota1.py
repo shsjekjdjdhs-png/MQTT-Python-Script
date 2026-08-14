@@ -43,6 +43,8 @@ def parse_message(topic, payload_str):
         for field_name, value in data.items():
             if field_name in IGNORED_KEYS or not isinstance(value, (int, float)):
                 continue
+            if isinstance(value, bool):
+                value = int(value)
             readings.append(SensorReading(gateway_id, sensor_id, field_name, value))
 
     return readings
