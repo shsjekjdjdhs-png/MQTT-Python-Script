@@ -16,7 +16,6 @@ if exist "Bin_Sensor1.stop" (
 )
 
 echo %Date% %Time% - Bin_Sensor1 collector not running, restarting...
-echo %Date% %Time% - Bin_Sensor1 collector restarted >> "Logs\Bin_Sensor1_watchdog.log"
 
 where py >nul 2>nul
 if not errorlevel 1 (

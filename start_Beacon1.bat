@@ -16,7 +16,6 @@ if exist "Beacon1.stop" (
 )
 
 echo %Date% %Time% - Beacon1 collector not running, restarting...
-echo %Date% %Time% - Beacon1 collector restarted >> "Logs\Beacon1_watchdog.log"
 
 where py >nul 2>nul
 if not errorlevel 1 (

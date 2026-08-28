@@ -16,7 +16,6 @@ if exist "Tasmota1.stop" (
 )
 
 echo %Date% %Time% - Tasmota1 collector not running, restarting...
-echo %Date% %Time% - Tasmota1 collector restarted >> "Logs\Tasmota1_watchdog.log"
 
 where py >nul 2>nul
 if not errorlevel 1 (
