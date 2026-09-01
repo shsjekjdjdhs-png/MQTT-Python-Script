@@ -67,6 +67,9 @@ def parse_message(topic, payload_str):
         logging.warning(f"malformed JSON payload on {topic}: {payload_str!r}")
         return []
 
+    if not isinstance(payload, dict):
+        return []
+
     datas = payload.get("datas")
     if not isinstance(datas, dict):
         return []
