@@ -1,5 +1,6 @@
 /Logs
 /certs
+/credentials
 .env
 /__pycache__
 *.stop

@@ -2,11 +2,13 @@ import json
 import logging
 import queue
 import threading
+from datetime import datetime
 
 from log import setup_logging
 
 setup_logging("Bin_Sensor2.log")  # must run before importing InfluxDB - it logs a connection check at import time
 
+from GoogleSheets import append_row
 from InfluxDB import insert_data
 from MQTT import start_mqtt_listener
 
@@ -86,8 +88,36 @@ def parse_message(topic, payload_str):
     return readings
 
 
+# Columns written to the Google Sheet, in order. This is separate from
+# READING_FIELDS (which controls InfluxDB) so a field can be dropped from
+# the sheet without affecting InfluxDB - just comment out its line.
+SHEET_FIELDS = [
+    "air_height",
+    "volt",
+    "temperature",
+    "tilt_angle",
+    "longitude",
+    "latitude",
+    "alarm_full",
+    "alarm_battery",
+    "alarm_fire",
+    "alarm_fall",
+    "frame_counter",
+]
+
+SHEET_HEADER = ["date", "time", "bin_status", "sensor_id"] + SHEET_FIELDS
+
+
+def _bin_status(alarm_full_value):
+    if alarm_full_value is None:
+        return ""
+    return "Full" if alarm_full_value >= 1 else "Normal"
+
+
 def parse_and_insert(topic, payload_str):
-    for reading in parse_message(topic, payload_str):
+    readings = parse_message(topic, payload_str)
+
+    for reading in readings:
         logging.info(reading)
         try:
             insert_data(
@@ -100,6 +130,21 @@ def parse_and_insert(topic, payload_str):
             )
         except Exception as e:
             logging.error(f"failed to insert {reading}: {e}")
+
+    if readings:
+        sensor_id = readings[0].sensor_id
+        values_by_field = {reading.field_name: reading.value for reading in readings}
+        now = datetime.now()
+        row = [
+            now.strftime("%d/%m/%Y"),
+            now.strftime("%H:%M:%S"),
+            _bin_status(values_by_field.get("alarm_full")),
+            sensor_id,
+        ] + [values_by_field.get(field, "") for field in SHEET_FIELDS]
+        try:
+            append_row(row, "Bin_Sensor2", "Bin_Sensor2", header=SHEET_HEADER)
+        except Exception as e:
+            logging.error(f"failed to append row to Google Sheet: {e}")
 
 
 if __name__ == "__main__":
